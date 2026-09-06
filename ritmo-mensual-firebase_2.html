@@ -1,0 +1,1153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ritmo Mensual</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root {
+    --bg: #F6F3FB;
+    --surface: #FFFFFF;
+    --surface-2: #FBF9FE;
+    --ink: #251C31;
+    --ink-soft: #665C74;
+    --ink-faint: #9C90AC;
+    --border: #E4DEF0;
+    --accent: #8C2D6C;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #F1D9E7;
+    --accent-2: #1F8A72;
+    --accent-2-soft: #D8EFE7;
+    --warn: #B9711A;
+    --warn-soft: #F6E3C6;
+    --danger: #C43D5C;
+    --danger-soft: #F7D9E0;
+    --shadow: 0 1px 2px rgba(60, 30, 60, 0.06), 0 8px 24px -12px rgba(60, 30, 60, 0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #181220;
+      --surface: #221A2B;
+      --surface-2: #2A2133;
+      --ink: #F1ECF9;
+      --ink-soft: #B6ACC4;
+      --ink-faint: #7C7189;
+      --border: #392E45;
+      --accent: #E08FC0;
+      --accent-ink: #241521;
+      --accent-soft: #3B2337;
+      --accent-2: #63D3AE;
+      --accent-2-soft: #1C332C;
+      --warn: #EAB05B;
+      --warn-soft: #3B3122;
+      --danger: #F08A9E;
+      --danger-soft: #3C232B;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #181220;
+    --surface: #221A2B;
+    --surface-2: #2A2133;
+    --ink: #F1ECF9;
+    --ink-soft: #B6ACC4;
+    --ink-faint: #7C7189;
+    --border: #392E45;
+    --accent: #E08FC0;
+    --accent-ink: #241521;
+    --accent-soft: #3B2337;
+    --accent-2: #63D3AE;
+    --accent-2-soft: #1C332C;
+    --warn: #EAB05B;
+    --warn-soft: #3B3122;
+    --danger: #F08A9E;
+    --danger-soft: #3C232B;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', system-ui, sans-serif;
+    line-height: 1.45;
+  }
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; text-wrap: balance; margin: 0; }
+  .num { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  button, input, select { font-family: inherit; color: inherit; }
+  button { cursor: pointer; }
+  a { color: var(--accent); }
+  ::selection { background: var(--accent-soft); }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 20px 20px 64px; }
+
+  /* App bar */
+  .appbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .appbar-inner {
+    max-width: 1080px; margin: 0 auto; padding: 16px 20px 12px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .brand { display: flex; flex-direction: column; gap: 2px; }
+  .brand h1 { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .brand span { font-size: 0.8rem; color: var(--ink-soft); }
+  .status-pill {
+    font-size: 0.72rem; color: var(--ink-faint); border: 1px solid var(--border);
+    padding: 3px 9px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); flex: none; }
+  .status-dot.off { background: var(--ink-faint); }
+
+  .month-switch {
+    display: flex; align-items: center; gap: 10px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 6px; box-shadow: var(--shadow);
+  }
+  .month-switch button {
+    width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent;
+    color: var(--ink-soft); font-size: 1rem; display: flex; align-items: center; justify-content: center;
+  }
+  .month-switch button:hover { background: var(--accent-soft); color: var(--accent); }
+  .month-switch .label { font-weight: 600; font-size: 0.9rem; min-width: 132px; text-align: center; text-transform: capitalize; }
+
+  .tabs { display: flex; gap: 4px; padding: 12px 20px 0; max-width: 1080px; margin: 0 auto; }
+  .tab-btn {
+    border: none; background: transparent; padding: 9px 16px; border-radius: 10px 10px 0 0;
+    font-weight: 600; font-size: 0.88rem; color: var(--ink-soft); border-bottom: 2px solid transparent;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--surface); }
+  .tab-btn:hover:not(.active) { color: var(--ink); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 20px; box-shadow: var(--shadow); margin-bottom: 18px;
+  }
+  .card h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+  .card .hint { color: var(--ink-soft); font-size: 0.82rem; margin-bottom: 14px; }
+  .card-row { display: flex; gap: 20px; flex-wrap: wrap; }
+
+  /* Habit cards */
+  .habit-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px;
+  }
+  .is-loading { opacity: 0.5; pointer-events: none; transition: opacity 0.2s; }
+  .habit-card {
+    border: 1px solid var(--border); background: var(--surface-2); border-radius: 14px;
+    padding: 14px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .habit-top { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 12px; height: 12px; border-radius: 4px; flex: none; }
+  .habit-top input[type="text"] {
+    flex: 1; min-width: 0; border: 1px solid var(--border); background: var(--surface);
+    border-radius: 8px; padding: 7px 9px; font-size: 0.87rem; font-weight: 600;
+  }
+  .icon-btn {
+    background: transparent; border: 1px solid var(--border); border-radius: 7px;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    color: var(--ink-faint); font-size: 0.85rem; flex: none;
+  }
+  .icon-btn:hover { color: var(--danger); border-color: var(--danger-soft); background: var(--danger-soft); }
+
+  .habit-hours { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--ink-soft); }
+  .habit-hours input {
+    width: 62px; border: 1px solid var(--border); background: var(--surface); border-radius: 8px;
+    padding: 5px 7px; font-size: 0.84rem; font-family: 'IBM Plex Mono', monospace; text-align: center;
+  }
+  .hours-summary {
+    display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: 0.82rem; color: var(--ink-soft);
+  }
+  .hours-summary .bar-track { flex: 1; }
+  .hours-summary b { font-family: 'IBM Plex Mono', monospace; color: var(--ink); }
+
+  .hero-note {
+    background: linear-gradient(135deg, var(--accent-soft), var(--surface));
+    border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px;
+    margin-bottom: 18px; box-shadow: var(--shadow);
+  }
+  .hero-note .eyebrow {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--accent); margin-bottom: 8px; display: block;
+  }
+  .hero-note textarea {
+    width: 100%; border: none; background: transparent; resize: vertical; min-height: 64px;
+    font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: 1.15rem; line-height: 1.5;
+    color: var(--ink); padding: 0;
+  }
+  .hero-note textarea:focus { outline: none; }
+
+  .priority-seg { display: flex; gap: 6px; }
+  .priority-seg button {
+    flex: 1; border: 1px solid var(--border); background: var(--surface); border-radius: 8px;
+    padding: 5px 0; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+  .priority-seg button.on[data-p="alta"] { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+  .priority-seg button.on[data-p="media"] { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+  .priority-seg button.on[data-p="baja"] { background: var(--border); border-color: var(--ink-faint); color: var(--ink-soft); }
+
+  .habit-note {
+    width: 100%; resize: vertical; min-height: 52px; border: 1px solid var(--border);
+    background: var(--surface); border-radius: 8px; padding: 8px 9px; font-size: 0.82rem;
+    font-family: inherit; line-height: 1.4;
+  }
+  .habit-note::placeholder { color: var(--ink-faint); font-style: italic; }
+
+  .priority-tag {
+    font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;
+    margin-left: 6px; opacity: 0.85;
+  }
+
+  .add-line { display: flex; gap: 8px; margin-top: 12px; }
+  .add-line input { flex: 1; border: 1px solid var(--border); background: var(--surface-2); border-radius: 8px; padding: 8px 10px; font-size: 0.86rem; }
+  .add-line button, .ghost-btn {
+    border: 1px dashed var(--border); background: transparent; color: var(--accent);
+    border-radius: 8px; padding: 8px 14px; font-size: 0.84rem; font-weight: 600;
+  }
+  .add-line button:hover, .ghost-btn:hover { background: var(--accent-soft); border-style: solid; }
+
+  /* Donut */
+  .donut-row { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .donut {
+    width: 148px; height: 148px; border-radius: 50%; flex: none;
+    background: conic-gradient(var(--border) 0deg 360deg);
+  }
+  .donut-inner {
+    position: relative; width: 148px; height: 148px;
+  }
+  .donut-hole {
+    position: absolute; inset: 22px; border-radius: 50%; background: var(--surface);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .donut-hole b { font-size: 1.3rem; font-family: 'IBM Plex Mono', monospace; }
+  .donut-hole span { font-size: 0.68rem; color: var(--ink-soft); }
+  .legend { display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 200px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; }
+  .legend-item .swatch { width: 10px; height: 10px; border-radius: 3px; }
+  .legend-item .pct { margin-left: auto; font-family: 'IBM Plex Mono', monospace; color: var(--ink-soft); font-size: 0.8rem; }
+
+  /* Calendar grid */
+  .cal-scroll { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table.cal { border-collapse: collapse; width: 100%; min-width: 640px; }
+  table.cal th, table.cal td { padding: 0; text-align: center; }
+  table.cal thead th {
+    font-size: 0.68rem; color: var(--ink-faint); font-weight: 600; padding: 7px 3px;
+    background: var(--surface-2); position: sticky; top: 0;
+  }
+  table.cal th.name-col, table.cal td.name-col {
+    text-align: left; padding: 8px 12px; font-size: 0.82rem; font-weight: 600; white-space: nowrap;
+    position: sticky; left: 0; background: var(--surface); border-right: 1px solid var(--border);
+  }
+  table.cal tbody tr:nth-child(even) td:not(.name-col) { background: var(--surface-2); }
+  .day-cell button {
+    width: 26px; height: 26px; margin: 3px auto; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface); font-size: 0.68rem; color: var(--ink-faint); font-family: 'IBM Plex Mono', monospace;
+  }
+  .day-cell button.done { color: #fff; border-color: transparent; }
+  .day-cell button.today { box-shadow: 0 0 0 2px var(--accent) inset; }
+
+  /* Finance summary cards */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 760px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 15px 16px; box-shadow: var(--shadow);
+  }
+  .stat-card .k { font-size: 0.72rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; display:block; }
+  .stat-card .v { font-family: 'IBM Plex Mono', monospace; font-size: 1.32rem; font-weight: 600; }
+  .stat-card.income .v { color: var(--accent-2); }
+  .stat-card.spent .v { color: var(--ink); }
+  .stat-card.saved .v { color: var(--accent-2); }
+  .stat-card.left .v { }
+  .stat-card.left.neg .v { color: var(--danger); }
+  .stat-card input.income-input {
+    border: none; background: transparent; font-family: 'IBM Plex Mono', monospace; font-size: 1.32rem;
+    font-weight: 600; color: var(--accent-2); width: 100%; padding: 0;
+  }
+
+  .cat-list { display: flex; flex-direction: column; gap: 14px; }
+  .cat-row-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .cat-row-top input[type="text"] {
+    border: 1px solid var(--border); background: var(--surface-2); border-radius: 8px;
+    padding: 6px 9px; font-size: 0.86rem; font-weight: 600; width: 150px;
+  }
+  .cat-row-top .budget-field { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--ink-soft); margin-left: auto; }
+  .cat-row-top .budget-field input {
+    border: 1px solid var(--border); background: var(--surface-2); border-radius: 8px;
+    padding: 6px 8px; font-size: 0.84rem; width: 88px; font-family: 'IBM Plex Mono', monospace;
+  }
+  .bar-track { height: 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 999px; }
+  .bar-caption { display: flex; justify-content: space-between; font-size: 0.76rem; color: var(--ink-soft); margin-top: 5px; }
+
+  .tx-form { display: grid; grid-template-columns: 100px 1fr 130px 120px auto; gap: 8px; align-items: end; margin-bottom: 16px; }
+  @media (max-width: 720px) { .tx-form { grid-template-columns: 1fr 1fr; } }
+  .field label { display: block; font-size: 0.72rem; color: var(--ink-soft); margin-bottom: 4px; }
+  .field input, .field select {
+    width: 100%; border: 1px solid var(--border); background: var(--surface-2); border-radius: 8px;
+    padding: 8px 9px; font-size: 0.86rem;
+  }
+  .primary-btn {
+    background: var(--accent-2); color: #fff; border: none; border-radius: 8px; padding: 9px 16px;
+    font-weight: 600; font-size: 0.86rem; white-space: nowrap;
+  }
+  .primary-btn:hover { filter: brightness(1.08); }
+
+  .tx-table-scroll { overflow-x: auto; }
+  table.tx { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  table.tx th { text-align: left; font-size: 0.72rem; color: var(--ink-faint); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  table.tx td { padding: 8px; border-bottom: 1px solid var(--border); }
+  table.tx td.amt { font-family: 'IBM Plex Mono', monospace; text-align: right; }
+  table.tx tr:hover td { background: var(--surface-2); }
+  .cat-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; padding: 2px 8px; border-radius: 999px; }
+  .empty-note { color: var(--ink-faint); font-size: 0.84rem; padding: 18px 4px; text-align: center; }
+
+  .toolbar-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 8px; }
+  .export-btn {
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--ink-soft);
+    border-radius: 8px; padding: 7px 12px; font-size: 0.8rem; font-weight: 600;
+  }
+  .export-btn:hover { color: var(--accent-2); border-color: var(--accent-2-soft); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* Login overlay */
+  #loginScreen {
+    position: fixed; inset: 0; z-index: 100; background: var(--bg);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .login-card {
+    width: 100%; max-width: 340px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px 26px; box-shadow: var(--shadow);
+  }
+  .login-card h1 { font-size: 1.3rem; color: var(--accent); margin-bottom: 4px; }
+  .login-card p.hint { margin: 0 0 18px; }
+  .login-field { margin-bottom: 12px; }
+  .login-field label { display: block; font-size: 0.76rem; color: var(--ink-soft); margin-bottom: 4px; }
+  .login-field input {
+    width: 100%; border: 1px solid var(--border); background: var(--surface-2); border-radius: 9px;
+    padding: 10px 11px; font-size: 0.9rem;
+  }
+  .login-error {
+    color: var(--danger); font-size: 0.8rem; min-height: 1.2em; margin: 4px 0 10px;
+  }
+  .login-submit {
+    width: 100%; background: var(--accent); color: var(--accent-ink); border: none; border-radius: 9px;
+    padding: 11px; font-weight: 700; font-size: 0.9rem;
+  }
+  .login-submit:disabled { opacity: 0.6; }
+  #appRoot { display: none; }
+  .logout-btn {
+    border: 1px solid var(--border); background: transparent; color: var(--ink-faint);
+    border-radius: 999px; padding: 4px 11px; font-size: 0.74rem; font-weight: 600;
+  }
+  .logout-btn:hover { color: var(--danger); border-color: var(--danger-soft); background: var(--danger-soft); }
+</style>
+</head>
+<body>
+
+<!--
+  Antes de usarla: pega tu configuración de Firebase más abajo, donde dice
+  firebaseConfig, y asegúrate de tener habilitado el proveedor "Google" en
+  Firebase Authentication. Ver instrucciones aparte.
+-->
+
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>Ritmo Mensual</h1>
+    <p class="hint">Inicia sesión con tu cuenta de Google para ver tu planificador, sincronizado en todos tus dispositivos.</p>
+    <div class="login-error" id="loginError"></div>
+    <button type="button" class="login-submit" id="googleLoginBtn">Continuar con Google</button>
+  </div>
+</div>
+
+<div id="appRoot">
+
+<div class="appbar">
+  <div class="appbar-inner">
+    <div class="brand">
+      <h1>Ritmo Mensual</h1>
+      <span>Planificador de rutina + finanzas del mes</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="status-pill"><span class="status-dot off" id="statusDot"></span><span id="statusText">Sincronizando…</span></span>
+      <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
+      <div class="month-switch">
+        <button id="prevMonth" aria-label="Mes anterior">‹</button>
+        <span class="label" id="monthLabel">—</span>
+        <button id="nextMonth" aria-label="Mes siguiente">›</button>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="planner">Planificador</button>
+    <button class="tab-btn" data-tab="finance">Finanzas</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- PLANNER TAB -->
+  <div class="panel active" id="panel-planner">
+
+    <div class="hero-note">
+      <span class="eyebrow">Tu frase de este mes</span>
+      <textarea id="motivationNote" maxlength="400"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Hábitos, prioridad, horas y notas</h2>
+      <p class="hint">Define la prioridad, cuántas horas al día le dedicas y una notita de inspiración para cada hábito.</p>
+      <div class="habit-grid" id="activityList"></div>
+      <div class="hours-summary">
+        <span>Horas asignadas al día:</span>
+        <div class="bar-track"><div class="bar-fill" id="hoursBar"></div></div>
+        <b id="hoursLabel">0 / 24 h</b>
+      </div>
+      <div class="add-line">
+        <input type="text" id="newActivityName" placeholder="Nuevo hábito, ej. LEER" maxlength="40">
+        <button id="addActivityBtn">+ Agregar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Cumplimiento del mes</h2>
+      <p class="hint">Qué porcentaje de tus marcas del mes le corresponde a cada actividad.</p>
+      <div class="donut-row">
+        <div class="donut-inner">
+          <div class="donut" id="donutChart"></div>
+          <div class="donut-hole"><b id="donutTotal">0</b><span>marcas</span></div>
+        </div>
+        <div class="legend" id="donutLegend"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Registro diario</h2>
+      <p class="hint">Marca los días en que cumpliste cada actividad este mes.</p>
+      <div class="cal-scroll">
+        <table class="cal" id="calTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCE TAB -->
+  <div class="panel" id="panel-finance">
+
+    <div class="card">
+      <div class="stat-grid">
+        <div class="stat-card income">
+          <span class="k">Ingreso mensual</span>
+          <input class="income-input num" id="incomeInput" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="stat-card spent">
+          <span class="k">Gastado</span>
+          <span class="v num" id="statSpent">$0.00</span>
+        </div>
+        <div class="stat-card saved">
+          <span class="k">Ahorrado</span>
+          <span class="v num" id="statSaved">$0.00</span>
+        </div>
+        <div class="stat-card left" id="statLeftCard">
+          <span class="k">Disponible</span>
+          <span class="v num" id="statLeft">$0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Categorías y presupuesto</h2>
+      <p class="hint">Define un límite mensual por categoría (necesidades, gastos, ahorro, o las que quieras).</p>
+      <div class="cat-list" id="catList"></div>
+      <div class="add-line">
+        <input type="text" id="newCatName" placeholder="Nueva categoría, ej. TRANSPORTE" maxlength="30">
+        <button id="addCatBtn">+ Agregar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Movimientos del mes</h2>
+      <div class="tx-form">
+        <div class="field"><label>Día</label><input type="number" id="txDay" min="1" max="31"></div>
+        <div class="field"><label>Descripción</label><input type="text" id="txDesc" placeholder="Ej. Mercado, gimnasio, transferencia..." maxlength="60"></div>
+        <div class="field"><label>Categoría</label><select id="txCat"></select></div>
+        <div class="field"><label>Monto</label><input type="number" id="txAmount" min="0" step="0.01" placeholder="0.00"></div>
+        <button class="primary-btn" id="addTxBtn">Agregar</button>
+      </div>
+      <div class="toolbar-row">
+        <span class="hint" style="margin:0;">Movimientos de este mes</span>
+        <button class="export-btn" id="exportBtn">Exportar CSV</button>
+      </div>
+      <div class="tx-table-scroll">
+        <table class="tx" id="txTable"></table>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- /#appRoot -->
+
+<!-- Firebase (compat SDK — no build tools needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script>
+  // 1) Pega aquí tu configuración de Firebase (Consola de Firebase → Configuración
+  //    del proyecto → Tus apps → app Web → "Config"). Reemplaza todo este objeto.
+  var firebaseConfig = {
+    apiKey: "AIzaSyA5nWlR8Y676wSMs-JrVqGjLAPpUrvDyfY",
+    authDomain: "planner-42497.firebaseapp.com",
+    projectId: "planner-42497",
+    storageBucket: "planner-42497.firebasestorage.app",
+    messagingSenderId: "204999661138",
+    appId: "1:204999661138:web:aee6362c3fb590e5d4b18b",
+    measurementId: "G-7XKP6TGXLV"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
+  var firestore = firebase.firestore();
+  try { firestore.enablePersistence({ synchronizeTabs: false }); } catch (e) { /* offline cache best-effort */ }
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  var PALETTE = ["#8C2D6C", "#1F8A72", "#B9711A", "#3A6EA5", "#C43D5C", "#6A4FA0", "#2A9D8F", "#B0562F"];
+  var MONTH_NAMES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+  function uid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "id-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+  function monthKey(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); }
+  function daysInMonth(key) {
+    var parts = key.split("-").map(Number);
+    return new Date(parts[0], parts[1], 0).getDate();
+  }
+  function fmtMoney(n) {
+    n = Number(n) || 0;
+    return "$" + n.toLocaleString("es-EC", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+  function debounce(fn, ms) {
+    var t;
+    return function () {
+      var args = arguments;
+      clearTimeout(t);
+      t = setTimeout(function () { fn.apply(null, args); }, ms);
+    };
+  }
+
+  var PRIORITY_LABEL = { alta: "Alta", media: "Media", baja: "Baja" };
+  var PRIORITY_RANK = { alta: 0, media: 1, baja: 2 };
+  var PRIORITY_VAR = { alta: "var(--danger)", media: "var(--warn)", baja: "var(--ink-faint)" };
+
+  var DEFAULT_HOURS = {
+    "TRABAJO": 8, "GYM": 1, "ESTUDIAR INGLÉS": 1, "PROYECTOS Y BECAS": 1,
+    "COMIDA SALUDABLE": 1, "SKINCARE": 0.5, "LEER": 0.5
+  };
+  var DEFAULT_NOTES = {
+    "TRABAJO": "Este trabajo paga las horas que inviertes en todo lo demás de esta lista. Hazlo bien, pero no dejes que se coma el resto de quién quieres ser.",
+    "GYM": "El cuerpo que quieres no se construye el día que tienes ganas: se construye el día que no las tienes y vas de todos modos.",
+    "ESTUDIAR INGLÉS": "Cada palabra nueva es una puerta que hoy no puedes abrir y en un año sí. Diez minutos cuentan más que cero minutos perfectos.",
+    "PROYECTOS Y BECAS": "Nadie te va a regalar la oportunidad; la construyes aplicando aunque no te sientas lista. Envía la solicitud con miedo, no la dejes de enviar por miedo.",
+    "COMIDA SALUDABLE": "Lo que comes hoy es la energía con la que sostienes todo lo demás de esta lista. Cuídate como cuidarías a alguien que quieres ver llegar lejos.",
+    "SKINCARE": "Cinco minutos frente al espejo también son una forma de decirte que te importas, no solo un paso más de la rutina.",
+    "LEER": "Leer es la manera más barata de tener una conversación con alguien que ya resolvió el problema en el que estás pensando ahora."
+  };
+
+  var todayDate = new Date();
+  var state = {
+    currentMonth: monthKey(todayDate),
+    activities: [
+      { id: uid(), name: "TRABAJO", color: PALETTE[0], priority: "alta", hours: DEFAULT_HOURS["TRABAJO"], note: DEFAULT_NOTES["TRABAJO"] },
+      { id: uid(), name: "GYM", color: PALETTE[1], priority: "media", hours: DEFAULT_HOURS["GYM"], note: DEFAULT_NOTES["GYM"] },
+      { id: uid(), name: "ESTUDIAR INGLÉS", color: PALETTE[2], priority: "media", hours: DEFAULT_HOURS["ESTUDIAR INGLÉS"], note: DEFAULT_NOTES["ESTUDIAR INGLÉS"] },
+      { id: uid(), name: "PROYECTOS Y BECAS", color: PALETTE[3], priority: "alta", hours: DEFAULT_HOURS["PROYECTOS Y BECAS"], note: DEFAULT_NOTES["PROYECTOS Y BECAS"] },
+      { id: uid(), name: "COMIDA SALUDABLE", color: PALETTE[4], priority: "media", hours: DEFAULT_HOURS["COMIDA SALUDABLE"], note: DEFAULT_NOTES["COMIDA SALUDABLE"] },
+      { id: uid(), name: "SKINCARE", color: PALETTE[5], priority: "baja", hours: DEFAULT_HOURS["SKINCARE"], note: DEFAULT_NOTES["SKINCARE"] }
+    ],
+    motivationNote: "No vas a despertar un día siendo otra persona. Vas a irlo siendo hoy: en el gimnasio cuando no tenías ganas, en los diez minutos de inglés aunque fueran pocos, en la aplicación a esa beca que daba miedo enviar. Nadie cambia de golpe — cambia sumando días comunes y constantes hasta que un día se da cuenta de que ya no es la misma persona. Hoy suma uno de esos días.",
+    categories: [
+      { id: uid(), name: "NECESIDADES", color: PALETTE[0], budget: 0 },
+      { id: uid(), name: "GASTOS", color: PALETTE[2], budget: 0 },
+      { id: uid(), name: "AHORRO", color: PALETTE[1], budget: 0 }
+    ],
+    monthsPlanner: {},   // key -> { completions: { activityId: [days] } }
+    monthsFinance: {},   // key -> { income: n, transactions: [{id,categoryId,amount,desc,day}] }
+    activeTab: "planner"
+  };
+
+  function sortedActivities() {
+    return state.activities.slice().sort(function (a, b) {
+      return (PRIORITY_RANK[a.priority] ?? 1) - (PRIORITY_RANK[b.priority] ?? 1);
+    });
+  }
+
+  function getPlannerMonth(key) {
+    if (!state.monthsPlanner[key]) state.monthsPlanner[key] = { completions: {} };
+    return state.monthsPlanner[key];
+  }
+  function getFinanceMonth(key) {
+    if (!state.monthsFinance[key]) state.monthsFinance[key] = { income: 0, transactions: [] };
+    return state.monthsFinance[key];
+  }
+
+  // ---------- Persistence (Firebase Auth + Firestore — synced across devices) ----------
+  var currentUid = null;
+
+  function setStatus(text, on) {
+    document.getElementById("statusText").textContent = text;
+    document.getElementById("statusDot").classList.toggle("off", !on);
+  }
+
+  function userDoc() {
+    return firestore.collection("users").doc(currentUid);
+  }
+
+  function saveCloud() {
+    if (!currentUid) return;
+    setStatus("Guardando…", true);
+    userDoc().set({
+      activities: state.activities,
+      motivationNote: state.motivationNote,
+      categories: state.categories,
+      monthsPlanner: state.monthsPlanner,
+      monthsFinance: state.monthsFinance,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function () {
+      setStatus("Sincronizado en todos tus dispositivos", true);
+    }).catch(function (e) {
+      setStatus("No se pudo guardar: " + e.message, false);
+    });
+  }
+  var saveCloudDebounced = debounce(saveCloud, 500);
+  // Aliases so the rest of the app (written against the earlier local-only version) keeps working.
+  var saveConfig = saveCloud;
+  var saveConfigDebounced = saveCloudDebounced;
+  var savePlannerDebounced = saveCloudDebounced;
+  var saveFinanceDebounced = saveCloudDebounced;
+
+  function normalizeActivities(list) {
+    return (list || []).map(function (a) {
+      var name = a && a.name ? a.name : "ACTIVIDAD";
+      var key = name.toUpperCase();
+      return {
+        id: (a && a.id) || uid(),
+        name: name,
+        color: (a && a.color) || PALETTE[0],
+        priority: (a && a.priority) || "media",
+        hours: (a && a.hours != null && a.hours !== "") ? Number(a.hours) : (DEFAULT_HOURS[key] != null ? DEFAULT_HOURS[key] : 0.5),
+        note: (a && a.note && String(a.note).trim()) ? a.note : (DEFAULT_NOTES[key] || "")
+      };
+    });
+  }
+  function normalizeCategories(list) {
+    return (list || []).map(function (c) {
+      return {
+        id: (c && c.id) || uid(),
+        name: (c && c.name) || "CATEGORÍA",
+        color: (c && c.color) || PALETTE[0],
+        budget: (c && c.budget != null) ? Number(c.budget) : 0
+      };
+    });
+  }
+
+  function applyCloudData(data) {
+    if (data) {
+      if (Array.isArray(data.activities) && data.activities.length) state.activities = normalizeActivities(data.activities);
+      if (typeof data.motivationNote === "string" && data.motivationNote.trim()) state.motivationNote = data.motivationNote;
+      if (Array.isArray(data.categories) && data.categories.length) state.categories = normalizeCategories(data.categories);
+      if (data.monthsPlanner && typeof data.monthsPlanner === "object") state.monthsPlanner = data.monthsPlanner;
+      if (data.monthsFinance && typeof data.monthsFinance === "object") state.monthsFinance = data.monthsFinance;
+    }
+    renderAll();
+  }
+
+  function showApp(show) {
+    document.getElementById("loginScreen").style.display = show ? "none" : "flex";
+    document.getElementById("appRoot").style.display = show ? "block" : "none";
+  }
+
+  function initAuth() {
+    auth.onAuthStateChanged(function (user) {
+      if (user) {
+        currentUid = user.uid;
+        setStatus("Cargando tus datos…", true);
+        userDoc().get().then(function (snap) {
+          if (snap.exists) {
+            applyCloudData(snap.data());
+          } else {
+            // primera vez de este usuario: sube los valores por defecto
+            applyCloudData(null);
+            saveCloud();
+          }
+          setStatus("Sincronizado en todos tus dispositivos", true);
+        }).catch(function (e) {
+          setStatus("Sin conexión — mostrando la última copia guardada", false);
+          renderAll();
+        });
+        showApp(true);
+      } else {
+        currentUid = null;
+        showApp(false);
+      }
+    });
+  }
+
+  document.getElementById("googleLoginBtn").addEventListener("click", function () {
+    var errEl = document.getElementById("loginError");
+    var btn = document.getElementById("googleLoginBtn");
+    errEl.textContent = "";
+    btn.disabled = true;
+    btn.textContent = "Entrando…";
+    var provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(function (err) {
+      if (err.code === "auth/popup-blocked" || err.code === "auth/cancelled-popup-request" || err.code === "auth/operation-not-supported-in-this-environment") {
+        auth.signInWithRedirect(provider); // fallback para Safari/iOS si el popup no se puede abrir
+      } else if (err.code === "auth/unauthorized-domain") {
+        errEl.textContent = "Este sitio aún no está autorizado en Firebase (agrega el dominio en Authentication → Configuración → Dominios autorizados).";
+      } else if (err.code !== "auth/popup-closed-by-user") {
+        errEl.textContent = "No se pudo iniciar sesión: " + err.message;
+      }
+    }).finally(function () {
+      btn.disabled = false;
+      btn.textContent = "Continuar con Google";
+    });
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    auth.signOut();
+  });
+
+  // ---------- Rendering: header ----------
+  function renderMonthLabel() {
+    var parts = state.currentMonth.split("-").map(Number);
+    document.getElementById("monthLabel").textContent = MONTH_NAMES[parts[1] - 1] + " " + parts[0];
+  }
+
+  // ---------- Rendering: habit cards (prioridad + nota) ----------
+  function renderActivityList() {
+    var list = document.getElementById("activityList");
+    list.innerHTML = "";
+    sortedActivities().forEach(function (a) {
+      var card = document.createElement("div");
+      card.className = "habit-card";
+      card.innerHTML =
+        '<div class="habit-top">' +
+          '<span class="swatch" style="background:' + a.color + '"></span>' +
+          '<input type="text" value="' + escapeHtml(a.name) + '" maxlength="40" data-id="' + a.id + '" data-field="name">' +
+          '<button class="icon-btn" data-remove="' + a.id + '" title="Eliminar">✕</button>' +
+        '</div>' +
+        '<div class="priority-seg" data-id="' + a.id + '">' +
+          ["alta", "media", "baja"].map(function (p) {
+            return '<button data-p="' + p + '" class="' + (a.priority === p ? "on" : "") + '">' + PRIORITY_LABEL[p] + '</button>';
+          }).join("") +
+        '</div>' +
+        '<div class="habit-hours">' +
+          '<span>Horas al día</span>' +
+          '<input type="number" min="0" max="24" step="0.25" value="' + (a.hours != null ? a.hours : 0) + '" data-id="' + a.id + '" data-field="hours">' +
+        '</div>' +
+        '<textarea class="habit-note" maxlength="180" placeholder="Notita de inspiración, ej. una frase que te recuerde por qué lo haces..." data-id="' + a.id + '">' + escapeHtml(a.note || "") + '</textarea>';
+      list.appendChild(card);
+    });
+
+    list.querySelectorAll('input[data-field="name"]').forEach(function (inp) {
+      inp.addEventListener("input", function () {
+        var a = state.activities.find(function (x) { return x.id === inp.dataset.id; });
+        if (a) { a.name = inp.value; saveConfigDebounced(); renderDonut(); renderCalendar(); }
+      });
+    });
+    list.querySelectorAll(".priority-seg").forEach(function (seg) {
+      seg.querySelectorAll("button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var a = state.activities.find(function (x) { return x.id === seg.dataset.id; });
+          if (!a) return;
+          a.priority = btn.dataset.p;
+          saveConfigDebounced();
+          renderActivityList(); renderCalendar();
+        });
+      });
+    });
+    list.querySelectorAll('input[data-field="hours"]').forEach(function (inp) {
+      inp.addEventListener("input", function () {
+        var a = state.activities.find(function (x) { return x.id === inp.dataset.id; });
+        if (a) { a.hours = clamp(Number(inp.value) || 0, 0, 24); saveConfigDebounced(); renderHoursSummary(); }
+      });
+    });
+    list.querySelectorAll(".habit-note").forEach(function (ta) {
+      ta.addEventListener("input", function () {
+        var a = state.activities.find(function (x) { return x.id === ta.dataset.id; });
+        if (a) { a.note = ta.value; saveConfigDebounced(); }
+      });
+    });
+    list.querySelectorAll("[data-remove]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (state.activities.length <= 1) return;
+        state.activities = state.activities.filter(function (x) { return x.id !== btn.dataset.remove; });
+        saveConfig();
+        renderActivityList(); renderDonut(); renderCalendar(); renderHoursSummary();
+      });
+    });
+    renderHoursSummary();
+  }
+
+  function renderHoursSummary() {
+    var total = state.activities.reduce(function (s, a) { return s + (Number(a.hours) || 0); }, 0);
+    var bar = document.getElementById("hoursBar");
+    var label = document.getElementById("hoursLabel");
+    var pct = clamp((total / 24) * 100, 0, 100);
+    var color = total > 24 ? "var(--danger)" : (total > 16 ? "var(--warn)" : "var(--accent-2)");
+    bar.style.width = pct + "%";
+    bar.style.background = color;
+    label.textContent = (Math.round(total * 100) / 100) + " / 24 h";
+    label.style.color = total > 24 ? "var(--danger)" : "var(--ink)";
+  }
+
+  function addActivity(name) {
+    if (!name) return;
+    var key = name.toUpperCase();
+    var color = PALETTE[state.activities.length % PALETTE.length];
+    state.activities.push({
+      id: uid(), name: key, color: color, priority: "media",
+      hours: DEFAULT_HOURS[key] != null ? DEFAULT_HOURS[key] : 0.5,
+      note: DEFAULT_NOTES[key] || ""
+    });
+    saveConfig();
+    renderActivityList(); renderDonut(); renderCalendar();
+  }
+  document.getElementById("addActivityBtn").addEventListener("click", function () {
+    var inp = document.getElementById("newActivityName");
+    var name = inp.value.trim();
+    if (!name) return;
+    addActivity(name);
+    inp.value = "";
+  });
+  document.getElementById("newActivityName").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); document.getElementById("addActivityBtn").click(); }
+  });
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // ---------- Donut (cumplimiento) ----------
+  function renderDonut() {
+    var pKey = state.currentMonth;
+    var completions = getPlannerMonth(pKey).completions || {};
+    var counts = sortedActivities().map(function (a) {
+      return { a: a, n: (completions[a.id] || []).length };
+    });
+    var total = counts.reduce(function (s, c) { return s + c.n; }, 0);
+    document.getElementById("donutTotal").textContent = total;
+
+    var donut = document.getElementById("donutChart");
+    var legend = document.getElementById("donutLegend");
+    legend.innerHTML = "";
+    if (total === 0) {
+      donut.style.background = "conic-gradient(var(--border) 0deg 360deg)";
+      legend.innerHTML = '<div class="empty-note" style="padding:0;">Aún no marcas ningún día este mes.</div>';
+      return;
+    }
+    var acc = 0, stops = [];
+    counts.forEach(function (c) {
+      if (c.n === 0) return;
+      var startDeg = (acc / total) * 360;
+      acc += c.n;
+      var endDeg = (acc / total) * 360;
+      stops.push(c.a.color + " " + startDeg.toFixed(2) + "deg " + endDeg.toFixed(2) + "deg");
+      var item = document.createElement("div");
+      item.className = "legend-item";
+      item.innerHTML = '<span class="swatch" style="background:' + c.a.color + '"></span>' +
+        '<span>' + escapeHtml(c.a.name) + '</span>' +
+        '<span class="pct">' + Math.round((c.n / total) * 100) + '%</span>';
+      legend.appendChild(item);
+    });
+    donut.style.background = "conic-gradient(" + stops.join(", ") + ")";
+  }
+
+  // ---------- Calendar grid ----------
+  function renderCalendar() {
+    var key = state.currentMonth;
+    var nDays = daysInMonth(key);
+    var completions = getPlannerMonth(key).completions || {};
+    var isCurrentMonth = key === monthKey(new Date());
+    var todayNum = todayDate.getDate();
+
+    var table = document.getElementById("calTable");
+    var thead = "<thead><tr><th class=\"name-col\">Actividad</th>";
+    for (var d = 1; d <= nDays; d++) thead += "<th>" + d + "</th>";
+    thead += "</tr></thead>";
+
+    var tbody = "<tbody>";
+    sortedActivities().forEach(function (a) {
+      var done = completions[a.id] || [];
+      var prio = a.priority || "media";
+      tbody += "<tr><td class=\"name-col\"><span class=\"swatch\" style=\"background:" + a.color + ";display:inline-block;margin-right:6px;\"></span>" + escapeHtml(a.name) +
+        "<span class=\"priority-tag\" style=\"color:" + PRIORITY_VAR[prio] + "\">" + PRIORITY_LABEL[prio] + "</span></td>";
+      for (var d = 1; d <= nDays; d++) {
+        var isDone = done.indexOf(d) !== -1;
+        var isToday = isCurrentMonth && d === todayNum;
+        tbody += "<td class=\"day-cell\"><button class=\"" + (isDone ? "done" : "") + (isToday ? " today" : "") +
+          "\" style=\"" + (isDone ? "background:" + a.color : "") + "\" data-act=\"" + a.id + "\" data-day=\"" + d + "\">" + d + "</button></td>";
+      }
+      tbody += "</tr>";
+    });
+    tbody += "</tbody>";
+    table.innerHTML = thead + tbody;
+
+    table.querySelectorAll("button[data-act]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var actId = btn.dataset.act, day = Number(btn.dataset.day);
+        var pm = getPlannerMonth(key);
+        if (!pm.completions[actId]) pm.completions[actId] = [];
+        var idx = pm.completions[actId].indexOf(day);
+        if (idx === -1) pm.completions[actId].push(day); else pm.completions[actId].splice(idx, 1);
+        savePlannerDebounced();
+        renderCalendar();
+        renderDonut();
+      });
+    });
+  }
+
+  // ---------- Finance: categories ----------
+  function renderCategories() {
+    var wrap = document.getElementById("catList");
+    wrap.innerHTML = "";
+    var key = state.currentMonth;
+    var txs = getFinanceMonth(key).transactions || [];
+    state.categories.forEach(function (c) {
+      var spent = txs.filter(function (t) { return t.categoryId === c.id; })
+        .reduce(function (s, t) { return s + (Number(t.amount) || 0); }, 0);
+      var budget = Number(c.budget) || 0;
+      var pct = budget > 0 ? clamp((spent / budget) * 100, 0, 999) : (spent > 0 ? 100 : 0);
+      var barColor = pct > 100 ? "var(--danger)" : (pct > 80 ? "var(--warn)" : c.color);
+
+      var row = document.createElement("div");
+      row.innerHTML =
+        '<div class="cat-row-top">' +
+          '<span class="swatch" style="background:' + c.color + '"></span>' +
+          '<input type="text" value="' + escapeHtml(c.name) + '" data-id="' + c.id + '" data-field="name">' +
+          '<div class="budget-field">límite mensual <input type="number" min="0" step="0.01" value="' + budget + '" data-id="' + c.id + '" data-field="budget"></div>' +
+          '<button class="icon-btn" data-remove-cat="' + c.id + '" title="Eliminar">✕</button>' +
+        '</div>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + Math.min(pct, 100) + '%; background:' + barColor + '"></div></div>' +
+        '<div class="bar-caption"><span class="num">' + fmtMoney(spent) + ' usado</span><span class="num">' + (budget > 0 ? Math.round(pct) + '% del límite' : 'sin límite definido') + '</span></div>';
+      wrap.appendChild(row);
+    });
+
+    wrap.querySelectorAll('input[data-field="name"]').forEach(function (inp) {
+      inp.addEventListener("input", function () {
+        var c = state.categories.find(function (x) { return x.id === inp.dataset.id; });
+        if (c) { c.name = inp.value; saveConfigDebounced(); renderTxTable(); renderTxCatOptions(); }
+      });
+    });
+    wrap.querySelectorAll('input[data-field="budget"]').forEach(function (inp) {
+      inp.addEventListener("input", function () {
+        var c = state.categories.find(function (x) { return x.id === inp.dataset.id; });
+        if (c) { c.budget = Number(inp.value) || 0; saveConfigDebounced(); renderCategories(); }
+      });
+    });
+    wrap.querySelectorAll("[data-remove-cat]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (state.categories.length <= 1) return;
+        state.categories = state.categories.filter(function (x) { return x.id !== btn.dataset.removeCat; });
+        saveConfig();
+        renderCategories(); renderTxCatOptions(); renderTxTable(); renderFinanceSummary();
+      });
+    });
+  }
+
+  document.getElementById("addCatBtn").addEventListener("click", function () {
+    var inp = document.getElementById("newCatName");
+    var name = inp.value.trim();
+    if (!name) return;
+    var color = PALETTE[state.categories.length % PALETTE.length];
+    state.categories.push({ id: uid(), name: name.toUpperCase(), color: color, budget: 0 });
+    inp.value = "";
+    saveConfig();
+    renderCategories(); renderTxCatOptions();
+  });
+  document.getElementById("newCatName").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); document.getElementById("addCatBtn").click(); }
+  });
+
+  function renderTxCatOptions() {
+    var sel = document.getElementById("txCat");
+    var current = sel.value;
+    sel.innerHTML = state.categories.map(function (c) {
+      return '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>';
+    }).join("");
+    if (current) sel.value = current;
+  }
+
+  // ---------- Finance: transactions ----------
+  function renderTxTable() {
+    var key = state.currentMonth;
+    var txs = (getFinanceMonth(key).transactions || []).slice().sort(function (a, b) { return (a.day || 0) - (b.day || 0); });
+    var table = document.getElementById("txTable");
+    if (!txs.length) {
+      table.innerHTML = '<tr><td class="empty-note">Aún no tienes movimientos este mes. Agrega el primero arriba.</td></tr>';
+      return;
+    }
+    var catById = {};
+    state.categories.forEach(function (c) { catById[c.id] = c; });
+    var head = "<thead><tr><th>Día</th><th>Descripción</th><th>Categoría</th><th style=\"text-align:right\">Monto</th><th></th></tr></thead>";
+    var body = "<tbody>";
+    txs.forEach(function (t) {
+      var c = catById[t.categoryId] || { name: "—", color: "#999" };
+      body += "<tr><td class=\"num\">" + (t.day || "") + "</td><td>" + escapeHtml(t.desc || "") + "</td>" +
+        "<td><span class=\"cat-chip\" style=\"background:" + c.color + "22; color:" + c.color + "\">" + escapeHtml(c.name) + "</span></td>" +
+        "<td class=\"amt num\">" + fmtMoney(t.amount) + "</td>" +
+        "<td><button class=\"icon-btn\" data-del-tx=\"" + t.id + "\" title=\"Eliminar\">✕</button></td></tr>";
+    });
+    body += "</tbody>";
+    table.innerHTML = head + body;
+
+    table.querySelectorAll("[data-del-tx]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var fm = getFinanceMonth(key);
+        fm.transactions = fm.transactions.filter(function (t) { return t.id !== btn.dataset.delTx; });
+        saveFinanceDebounced();
+        renderTxTable(); renderCategories(); renderFinanceSummary();
+      });
+    });
+  }
+
+  document.getElementById("addTxBtn").addEventListener("click", function () {
+    var day = Number(document.getElementById("txDay").value) || todayDate.getDate();
+    var desc = document.getElementById("txDesc").value.trim();
+    var catId = document.getElementById("txCat").value;
+    var amount = Number(document.getElementById("txAmount").value);
+    if (!amount || amount <= 0 || !catId) return;
+    var fm = getFinanceMonth(state.currentMonth);
+    fm.transactions.push({ id: uid(), categoryId: catId, amount: amount, desc: desc, day: clamp(day, 1, 31) });
+    document.getElementById("txDesc").value = "";
+    document.getElementById("txAmount").value = "";
+    saveFinanceDebounced();
+    renderTxTable(); renderCategories(); renderFinanceSummary();
+  });
+  ["txDay", "txDesc", "txAmount"].forEach(function (id) {
+    document.getElementById(id).addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); document.getElementById("addTxBtn").click(); }
+    });
+  });
+
+  // ---------- Finance: summary ----------
+  function isAhorroCategory(c) { return /AHORR/.test(c.name.toUpperCase()); }
+
+  function renderFinanceSummary() {
+    var key = state.currentMonth;
+    var fm = getFinanceMonth(key);
+    var txs = fm.transactions || [];
+    var catById = {}; state.categories.forEach(function (c) { catById[c.id] = c; });
+
+    var saved = 0, spent = 0;
+    txs.forEach(function (t) {
+      var c = catById[t.categoryId];
+      var amt = Number(t.amount) || 0;
+      if (c && isAhorroCategory(c)) saved += amt; else spent += amt;
+    });
+    var income = Number(fm.income) || 0;
+    var left = income - spent - saved;
+
+    document.getElementById("incomeInput").value = fm.income || "";
+    document.getElementById("statSpent").textContent = fmtMoney(spent);
+    document.getElementById("statSaved").textContent = fmtMoney(saved);
+    var leftEl = document.getElementById("statLeft");
+    leftEl.textContent = fmtMoney(left);
+    document.getElementById("statLeftCard").classList.toggle("neg", left < 0);
+  }
+
+  document.getElementById("incomeInput").addEventListener("input", function (e) {
+    var fm = getFinanceMonth(state.currentMonth);
+    fm.income = Number(e.target.value) || 0;
+    saveFinanceDebounced();
+    renderFinanceSummary();
+  });
+
+  // ---------- Export CSV ----------
+  document.getElementById("exportBtn").addEventListener("click", function () {
+    var key = state.currentMonth;
+    var txs = (getFinanceMonth(key).transactions || []).slice().sort(function (a, b) { return (a.day || 0) - (b.day || 0); });
+    var catById = {}; state.categories.forEach(function (c) { catById[c.id] = c; });
+    var rows = [["dia", "descripcion", "categoria", "monto"]];
+    txs.forEach(function (t) {
+      rows.push([t.day, (t.desc || "").replace(/,/g, ";"), (catById[t.categoryId] || {}).name || "", (Number(t.amount) || 0).toFixed(2)]);
+    });
+    var csv = rows.map(function (r) { return r.join(","); }).join("\n");
+    try {
+      var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "movimientos-" + key + ".csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    } catch (e) { alert("No se pudo exportar el archivo en este navegador."); }
+  });
+
+  // ---------- Tabs ----------
+  document.querySelectorAll(".tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+      state.activeTab = btn.dataset.tab;
+    });
+  });
+
+  // ---------- Month navigation ----------
+  function shiftMonth(delta) {
+    var parts = state.currentMonth.split("-").map(Number);
+    var d = new Date(parts[0], parts[1] - 1 + delta, 1);
+    state.currentMonth = monthKey(d);
+    renderAll();
+  }
+  document.getElementById("prevMonth").addEventListener("click", function () { shiftMonth(-1); });
+  document.getElementById("nextMonth").addEventListener("click", function () { shiftMonth(1); });
+
+  // ---------- Motivation note ----------
+  function renderMotivationNote() {
+    var ta = document.getElementById("motivationNote");
+    if (document.activeElement !== ta) ta.value = state.motivationNote || "";
+  }
+  document.getElementById("motivationNote").addEventListener("input", function (e) {
+    state.motivationNote = e.target.value;
+    saveConfigDebounced();
+  });
+
+  // ---------- Render all ----------
+  function renderAll() {
+    renderMonthLabel();
+    renderMotivationNote();
+    renderActivityList();
+    renderDonut();
+    renderCalendar();
+    renderCategories();
+    renderTxCatOptions();
+    renderTxTable();
+    renderFinanceSummary();
+  }
+
+  renderAll();
+  initAuth();
+})();
+</script>
+</body>
+</html>
